@@ -1,5 +1,8 @@
-simdata.json
+# These files are usually large
+simdata*.json
+# Below are build artifacts
 nnsim
 nnsim.exe
 nnview.exe
 nnview
+genome.html
