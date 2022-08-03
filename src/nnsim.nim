@@ -227,4 +227,5 @@ proc main() =
   echo "Writing to file"
   writeFile(spec.output.value & ".json", jsonStr)
 
-main()
+when isMainModule:
+  main()
