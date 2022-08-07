@@ -6,7 +6,11 @@ import json
 import argparse
 import progress
 import strutils
+import std/monotimes
+import times
 import therapist
+import lenientops
+import terminaltables
 
 randomize()
 
@@ -75,6 +79,10 @@ proc simulate(c: var Creature) =
     c.y += 1
 
 proc main() =
+  var
+    generationBegin, loadingBegin, generationEnd, loadingEnd: MonoTime
+    trainingBegin, trainingEnd, jsonConvertBegin, jsonConvertEnd, writeBegin, writeEnd: MonoTime
+    
   let spec = (
     generate: newCountArg(@["-g", "--generate"], help="Generate the creatures", multi=false),
     load: newFileArg(@["-l", "--load"], help="Load the initial creatures from a file (with extension)", defaultVal=""),
@@ -90,6 +98,7 @@ proc main() =
     mutation_rate: newFloatArg(@["-m", "--mutation"], help="Mutation rate (should be between 0.0, 1.0 or undefined behaviour will occur)", defaultVal=mutation_rate),
     change_rate: newFloatArg(@["-x", "--change"], help="Change rate (should be between 0.0, 1.0 or undefined behaviour will occur)", defaultVal=change_rate),
     aimrect: newStringArg(@["-a", "--aimrect"], help="Aim Rectangle in format `x,y:x,y`", defaultVal="45,45:50,50"),
+    time: newCountArg(@["-t", "--timeit"], help="Print out time information", multi=false),
     help: newHelpArg(@["-h", "--help"], help="Show this help message")
   )
   spec.parseOrQuit(prolog="Neural Network Simulator / Trainer")
@@ -127,6 +136,7 @@ proc main() =
     var bar = newProgressBar(total = ccount, width=progressBarWidth)
     bar.start()
 
+    generationBegin = getMonoTime()
     for _ in 1..ccount:
       var genome: seq[GenomePart]
       for _ in 1..gsize:
@@ -134,10 +144,12 @@ proc main() =
       let nn = newNn(ic, oc, nc, genome)
       creatures.add(newCreature(nn))
       bar.increment()
+    generationEnd = getMonoTime()
 
     bar.finish()
   else:
     echo "Loading from file: ", spec.load.value
+    loadingBegin = getMonoTime()
     let data = parseFile(spec.load.value)
     if data{"selected"}.getElems.len == 0:
       raise UsageError.newException("No selected creatures were found in provided file: $1" % [spec.load.value])
@@ -148,6 +160,7 @@ proc main() =
       let nn = jsonToNn(x)
       bar.increment()
       creatures.add(newCreature(nn))
+    loadingEnd = getMonoTime()
     bar.finish()
 
   # At this point, we are done with loading creatures
@@ -157,6 +170,7 @@ proc main() =
   bar.start()
   var allSimulationData: seq[seq[seq[SimDataPart]]] = @[];
   var allSelectedData: seq[seq[Nn]] = @[];
+  trainingBegin = getMonoTime()
   for s in 1..simulatorCounts:
     var simulationData: seq[seq[SimDataPart]] = @[];
     for _ in 1..simcount:
@@ -207,8 +221,10 @@ proc main() =
     bar.increment()
     if s == simulatorCounts or spec.include_final.count == 0:
         allSelectedData.add nextNn
+  trainingEnd = getMonoTime()
 
   bar.finish()
+  jsonConvertBegin = getMonoTime()
   var jsonobj = newJObject()
   jsonobj["selected"] = %*[]
   echo "Processing Json"
@@ -224,8 +240,29 @@ proc main() =
     jsonobj["simdata"] = %allSimulationData
   echo "Formatting Json"
   let jsonStr = $jsonobj
+  jsonConvertEnd = getMonoTime()
   echo "Writing to file"
+  writeBegin = getMonoTime()
   writeFile(spec.output.value & ".json", jsonStr)
+  writeEnd = getMonoTime()
 
+  if spec.time.count == 1:
+    var timeTable = newUnicodeTable()
+    timeTable.setHeaders(@["Section", "Time (s)", "Time (ns)"])
+    if spec.generate.count == 1:
+      let gentime = generationEnd - generationBegin
+      timeTable.addRow(@["Generation", $(gentime.inMilliseconds/1000.0), $gentime.inNanoseconds])
+    else:
+      let loadtime = loadingEnd - loadingBegin
+      timeTable.addRow(@["Loading", $(loadtime.inMilliseconds/1000.0), $loadtime.inNanoseconds])
+    let traintime = trainingEnd - trainingBegin
+    timeTable.addRow(@["Training/Simulating", $(traintime.inMilliseconds/1000.0), $traintime.inNanoseconds])
+    let traintimepergen = initDuration(traintime.inNanoseconds div simulatorCounts)
+    timeTable.addRow(@["Training/Simulating per gen", $(traintimepergen.inMilliseconds/1000.0), $traintimepergen.inNanoseconds])
+    let jsontime = jsonConvertEnd - jsonConvertBegin
+    timeTable.addRow(@["JSON Processing", $(jsontime.inMilliseconds/1000.0), $jsontime.inNanoseconds])
+    let writingtime = writeEnd - writeBegin
+    timeTable.addRow(@["Writing to file", $(writingtime.inMilliseconds/1000.0), $writingtime.inNanoseconds])
+    timeTable.printTable()
 when isMainModule:
   main()
