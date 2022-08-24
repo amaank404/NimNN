@@ -5,6 +5,11 @@ algorithms. This is a command line program and `nnsim.exe --help`
 should give out to you all available options for you to
 choose from.
 
+## Demo
+I have a demo for the same available at my webpage. Click
+[here](https://xcodz-dot.github.io/), A video shall be presented
+to you under My Projects section.
+
 ## Build
 you can build the latest release by cloning this repository
 and you need choosenim installation (`nim`, `nimble`)
@@ -20,6 +25,10 @@ For even faster builds. You can try this:
 nimble -d:release --mm:orc --deepcopy:on build nnsim  # 2x better performance.
 nnsim --help
 ```
+
+If you want, you can try compiling it with danger mode and it should
+run fine and faster. But unexpected things can happen on unexpected command line
+arguments. Doing so is thus not recommended.
 
 ## Download (Without build)
 If you do not want to compile this package, release builds
