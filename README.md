@@ -10,7 +10,14 @@ you can build the latest release by cloning this repository
 and you need choosenim installation (`nim`, `nimble`)
 
 ```bash
-nimble -d:release nnsim  # Using release significantly boosts performance
+nimble -d:release build nnsim  # Using release significantly boosts performance
+nnsim --help
+```
+
+For even faster builds. You can try this:
+
+```bash
+nimble -d:release --mm:orc --deepcopy:on build nnsim  # 2x better performance.
 nnsim --help
 ```
 
