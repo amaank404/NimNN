@@ -5,7 +5,7 @@ author        = "xcodz-dot"
 description   = "Neural Networks from scratch"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["nnview", "nnsim"]
+bin           = @["nnsim"]
 
 
 # Dependencies
