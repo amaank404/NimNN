@@ -27,21 +27,14 @@ type
     outputs_new_c: seq[int]
 
 proc newNn*(inputs: int, outputs: int, neurons: int, genome: sink seq[GenomePart]): Nn =
-  result.inputs = newSeqOfCap[float64](inputs)
-  result.outputs = newSeqOfCap[float64](outputs)
-  result.neurons = newSeqOfCap[float64](neurons)
-  result.neurons_new = newSeqOfCap[float64](neurons)
-  result.neurons_new_c = newSeqOfCap[int](neurons)
-  result.outputs_new = newSeqOfCap[float64](outputs)
-  result.outputs_new_c = newSeqOfCap[int](outputs)
+  result.inputs = newSeq[float64](inputs)
+  result.outputs = newSeq[float64](outputs)
+  result.neurons = newSeq[float64](neurons)
+  result.neurons_new = newSeq[float64](neurons)
+  result.neurons_new_c = newSeq[int](neurons)
+  result.outputs_new = newSeq[float64](outputs)
+  result.outputs_new_c = newSeq[int](outputs)
   result.genome = genome
-  for _ in 0..<inputs: result.inputs.add 0.0
-  for _ in 0..<outputs: result.outputs.add 0.0
-  for _ in 0..<neurons: result.neurons.add 0.0
-  for _ in 0..<neurons: result.neurons_new.add 0.0
-  for _ in 0..<outputs: result.outputs_new.add 0.0
-  for _ in 0..<neurons: result.neurons_new_c.add 0
-  for _ in 0..<outputs: result.outputs_new_c.add 0
 
 proc simulate*(nn: var Nn) =
   initZero(nn.neurons_new)
