@@ -7,7 +7,7 @@ choose from.
 
 ## Demo
 I have a demo for the same available at my webpage. Click
-[here](https://xcodz-dot.github.io/), A video shall be presented
+[here](https://amaank404.github.io/), A video shall be presented
 to you under My Projects section.
 
 ## Build
@@ -32,7 +32,7 @@ arguments. Doing so is thus not recommended.
 
 ## Download (Without build)
 If you do not want to compile this package, release builds
-are already provided [here](https://github.com/xcodz-dot/NimNN/releases).
+are already provided [here](https://github.com/amaank404/NimNN/releases).
 
 ## Scripts
 There are a few scripts written in python from my old Neural Network
@@ -47,5 +47,5 @@ information
 ### `genomeview.py`
 You can view the brain of a neural network using this script, do
 note that using this requires you to have the 
-[`/labels`](https://github.com/xcodz-dot/NimNN/tree/master/labels) 
+[`/labels`](https://github.com/amaank404/NimNN/tree/master/labels) 
 downloaded. use `python genomeview.py --help` for more information.
